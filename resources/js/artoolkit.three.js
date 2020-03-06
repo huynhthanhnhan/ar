@@ -106,8 +106,15 @@
             "Sử dụng màn hình công nghệ Infinity O khoét lỗ cho camera selfie"
         ];
 
+        var list_Camera_Content = ["Camera đỉnh cao, độ phân giải siêu khủng 108 MP",
+            "Sự kết hợp độc đáo giữa bộ 4 camera siêu khủng",
+            "Chế độ Space Zoom 100x số 1 trên thế giới smartphone",
+            "Tính năng quay phim chất điện ảnh 8K",
+            "Kết hợp cùng công nghệ chống rung quang học OIS"
+        ]
 
 
+        var typeContext; // status type of canvas hint or info
         /**
          * Create content for the canvas
          * 
@@ -118,24 +125,25 @@
             var canvas = document.getElementById("boxCanvas");
             var ctx = canvas.getContext("2d");
             ctx.strokeStyle = 'white';
-            var boxWidth = canvas.width;
-            var boxHeight = canvas.height;
-            ctx.strokeRect(canvas.width / 2 - boxWidth / 2, canvas.height / 2 - boxHeight / 2, boxWidth, boxHeight);
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.font = textSize + 'px' + " Comic Sans MS";
             ctx.fillStyle = "white";
             ctx.textAlign = "center";
 
             var drawContent = function(listContent, boxWidth, textSize) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 var yIndex = -boxHeight / 2;
+                console.log('content')
                 for (var i = 0; i < listContent.length; i++) {
                     yIndex = wrapText(ctx, listContent[i], 0, yIndex + textSize + textSize / 2, boxWidth - textSize, textSize);
                 }
             }
             if (type == 'hint_mobile' || type == 'hint_mobile_portraint' || type == 'hint_desktop') {
-                ctx.fillStyle = "#9ea7b8";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                typeContext = 'hint';
                 ctx.lineWidth = 50;
+                var boxWidth = canvas.width;
+                var boxHeight = canvas.height;
+                ctx.strokeRect(canvas.width / 2 - boxWidth / 2, canvas.height / 2 - boxHeight / 2, boxWidth, boxHeight);
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.font = boxWidth / 10 + 'px' + " Comic Sans MS";
                 ctx.fillText("Scan marker here", 0, 0);
                 switch (type) {
                     case 'hint_mobile':
@@ -147,14 +155,25 @@
                         break;
                 }
             } else {
+                typeContext = 'info';
                 ctx.fillStyle = "#9ea7b8";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.lineWidth = 10;
 
+                var boxWidth = canvas.width;
+                var boxHeight = canvas.height;
+                ctx.strokeRect(canvas.width / 2 - boxWidth / 2, canvas.height / 2 - boxHeight / 2, boxWidth, boxHeight);
+                ctx.translate(canvas.width / 2, canvas.height / 2);
                 var textSize = boxWidth / 20;
+                ctx.font = textSize + 'px' + " Comic Sans MS";
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
                 switch (type) {
                     case 'info_front':
                         drawContent(list_Front_Content, boxWidth, textSize);
+                        break;
+                    case 'info_camera':
+                        drawContent(list_Camera_Content, boxWidth, textSize);
                         break;
 
                 }
@@ -196,6 +215,7 @@
         var planeBow, planeArcher; // plane for the Bow and Archer infomation
         var global_scene; // save scene to global for use in setUpThree
         var global_arcontroller; // save arcontroller to global for use in setUpThree
+
         /**
          * This function create element of THREE: plane, scene, camera,light, ...
          * 
@@ -203,6 +223,7 @@
          * @param {any} video - set the video element. In this case, video will be set by this.image (image is a video element created in artoolkit.min.js)
          */
         ARController.prototype.createThreeScene = function(video) {
+
             video = video || this.image;
 
             this.setupThree();
@@ -232,8 +253,10 @@
             // texture.repeat.z = -1;
 
             // create plane for "Scan marker here" box
+            var scale = typeContext == 'hint' ? -1 : -1.5; // scale of plane for scan marker here or info mobile
+            console.log(typeContext)
             var planeB = new THREE.Mesh(
-                new THREE.PlaneBufferGeometry(-1.5, -1.5),
+                new THREE.PlaneBufferGeometry(scale, scale),
                 new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true })
             );
             planeBox = planeB;
@@ -321,6 +344,7 @@
                 isInteract: function() { return isShow; }, // get isShow variable for use in main.js
                 planeBow: planeBow, // public plane of Bow
                 planeArcher: planeArcher, // public plane of Archer
+                planeBox: planeBox, //public plane box (of hint and info)
 
                 /**
                  * Process function, check if model detected it will be visible
@@ -405,7 +429,8 @@
             */
             this.addEventListener('getNFTMarker', function(ev) {
                 isShow = true;
-                planeBox.visible = false;
+                if (typeContext == 'hint')
+                    planeBox.visible = false;
                 var marker = ev.data.marker;
                 var obj;
 
@@ -566,7 +591,8 @@
             this.addEventListener('lostNFTMarker', function(ev) {
 
                 isShow = false;
-                planeBox.visible = true;
+                if (typeContext == 'hint')
+                    planeBox.visible = true;
                 planeBow.visible = false;
                 planeArcher.visible = false;
                 var marker = ev.data.marker;

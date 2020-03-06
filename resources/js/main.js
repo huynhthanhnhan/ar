@@ -117,8 +117,8 @@ function initAR(modelUri) {
                         renderer.setSize(arController.videoWidth, arController.videoHeight);
                         document.body.className += ' desktop';
                         // document.getElementById('renderCanvas').style.transform = 'scale(-1,1)';
-                        // arScene.setContext('hint_desktop');
-                        arScene.setContext('info_front');
+                        arScene.setContext('hint_desktop');
+                        // arScene.setContext('info_camera');
                     }
                     // document.getElementById('renderCanvasContext').style.width = '100%';
                     // document.getElementById('renderCanvasContext').style.height = (0.75 * document.getElementById('renderCanvasContext').offsetWidth) + 'px';
@@ -354,16 +354,43 @@ function initAR(modelUri) {
                             // document.getElementById('info').style.display = 'block';
                             // document.getElementById('info').style.left = clientPos.x;
                             // document.getElementById('info').style.top = clientPos.y;
-                            // console.log(this.pickedObject.name)
+                            console.log(this.pickedObject.name)
 
                             /////////// Check part of model with name /////////
-                            // if (this.pickedObject.name == 'Mesh_0.001_0') {
+                            switch (this.pickedObject.name) {
+                                case 'Mesh_0':
+                                    arScene.setContext('info_front');
+                                    arScene.planeBox.visible = true;
+                                    break;
+                                case 'Mesh.010_0':
+                                    arScene.setContext('info_camera');
+                                    arScene.planeBox.visible = true;
+                                    break;
+                                default:
+                                    arScene.setContext('hint_desktop');
+                            }
+                            // if (this.pickedObject.name == 'Mesh_0') {
                             //     // document.getElementById('info').textContent = 'Bow';
-                            //     arScene.planeBow.visible = true;
-                            //     arScene.planeArcher.visible = false;
-                            //     arScene.planeBow.position.x = normalizedPosition.x;
-                            //     arScene.planeBow.position.y = -normalizedPosition.y;
+                            //     // arScene.planeBow.visible = true;
+                            //     // arScene.planeArcher.visible = false;
+                            //     // arScene.planeBow.position.x = normalizedPosition.x;
+                            //     // arScene.planeBow.position.y = -normalizedPosition.y;
+                            //     arScene.setContext('info_front');
+                            //     arScene.planeBox.visible = true;
+                            // }
+                            // if (this.pickedObject.name == 'Mesh.010_0') {
+                            //     // document.getElementById('info').textContent = 'Bow';
+                            //     // arScene.planeBow.visible = true;
+                            //     // arScene.planeArcher.visible = false;
+                            //     // arScene.planeBow.position.x = normalizedPosition.x;
+                            //     // arScene.planeBow.position.y = -normalizedPosition.y;
+                            //     arScene.setContext('info_camera');
+                            //     arScene.planeBox.visible = true;
                             // } else {
+                            //     arScene.setContext('hint_desktop');
+                            //     // arScene.planeBox.visible = true;
+                            // }
+                            // else {
                             //     // document.getElementById('info').textContent = 'Archer';
                             //     arScene.planeBow.visible = false;
                             //     arScene.planeArcher.visible = true;
