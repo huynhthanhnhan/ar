@@ -1,0 +1,72 @@
+.portrait canvas {
+    /* transform-origin: 0 0; */
+    transform: rotate(-90deg);
+}
+
+.desktop canvas {
+    transform: scale(-1, 1);
+}
+
+.loading {
+    display: block;
+    position: absolute;
+    /* top: 0;
+    left: 0; */
+    z-index: 50;
+    width: 100vw;
+    height: 100vh;
+    background-color: #BF4945;
+    /* background-image: url("http://i.stack.imgur.com/MnyxU.gif"); */
+    background-image: url("../image/loading.gif");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.boxCanvas {
+    border: 10px solid #d3d3d3;
+    position: absolute;
+    margin: auto;
+    left: 0px;
+    right: 0px;
+    /* bottom: 0px; */
+    top: 70px;
+    /* transform: scale(1, 1); */
+    z-index: 1;
+}
+
+.renderCanvas {
+    /* position: absolute; */
+    margin: auto;
+    left: 0;
+    right: 0;
+}
+
+.errorMessage {
+    position: relative;
+    left: 50%;
+    top: 50%;
+    margin-top: 10%;
+    transform: translateX(-50%) translateY(-50%);
+    text-align: center;
+    font-size: x-large;
+    font-weight: bold;
+    font-family: Comic Sans MS;
+    color: red;
+}
+
+.info {
+    position: absolute;
+    display: none;
+    z-index: 100;
+    left: 546px;
+    top: 431px;
+    text-align: center;
+    color: greenyellow;
+    font-size: 200%;
+    font-weight: bold;
+    font-family: Comic Sans MS;
+    pointer-events: none;
+    border-width: thick;
+    border-style: dashed;
+    border-color: blue;
+}
