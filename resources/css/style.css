@@ -1,3 +1,8 @@
+@font-face {
+    font-family: 'samsung';
+    src: url('../font/iCiel-SamsungSharpSans-Bold_SMCPS.ttf');
+}
+
 .portrait canvas {
     /* transform-origin: 0 0; */
     transform: rotate(-90deg);

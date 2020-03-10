@@ -113,59 +113,91 @@
             "Kết hợp cùng công nghệ chống rung quang học OIS"
         ]
 
+        var list_Back_Content = ["Vi xử lý mạnh mẽ mang tên Exynos 990 với xung nhịp cao nhất có thể đạt tới  2.73 GHz",
+            "Dung lượng RAM 12 GB và bộ nhớ trong 128 GB, hỗ trợ thẻ nhớ ngoài lên đến 1T",
+            "điểm hiệu năng mạnh mẽ lên tới 503.122 điểm",
+            "Pin dung lượng lớn 5000 mAh có hỗ trợ sạc nhanh 45 W",
+            "Chế độ sạc không dây công suất 15W"
+        ];
+
 
         var typeContext; // status type of canvas hint or info
+        var isFirstSetTypeContext = true; // only set the transform for canvas on the first time
+        var isPortraint = false; // check is portraint mode
         /**
          * Create content for the canvas
          * 
          * @param {String} type - type of context
          */
-
         var createContext = function(type) {
+            var renderCanvas = document.getElementById('renderCanvasContext');
+            console.log('set')
             var canvas = document.getElementById("boxCanvas");
             var ctx = canvas.getContext("2d");
+            ctx.clearRect(-canvas.width, -canvas.height, canvas.width * 2, canvas.height * 2);
             ctx.strokeStyle = 'white';
             ctx.fillStyle = "white";
             ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            var boxWidth = canvas.width;
+            var boxHeight = canvas.height;
+            if (type == 'hint_mobile_portraint')
+                isPortraint = true;
+            if (isPortraint) {
+                var temp = boxWidth;
+                boxWidth = boxHeight;
+                boxHeight = temp;
+            }
 
             var drawContent = function(listContent, boxWidth, textSize) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                var yIndex = -boxHeight / 2;
-                console.log('content')
+                var yIndex = 0;
+                if (isPortraint)
+                    ctx.rotate(Math.PI / 2);
                 for (var i = 0; i < listContent.length; i++) {
-                    yIndex = wrapText(ctx, listContent[i], 0, yIndex + textSize + textSize / 2, boxWidth - textSize, textSize);
+                    yIndex = wrapText(ctx, listContent[i], boxWidth / 2, yIndex + textSize, boxWidth - textSize, textSize);
                 }
+                if (isPortraint)
+                    ctx.rotate(-Math.PI / 2);
+                // ctx.translate(-canvas.width / 2, -canvas.height / 2)
             }
             if (type == 'hint_mobile' || type == 'hint_mobile_portraint' || type == 'hint_desktop') {
                 typeContext = 'hint';
+                if (isShow)
+                    planeBox.visible = false;
                 ctx.lineWidth = 50;
-                var boxWidth = canvas.width;
-                var boxHeight = canvas.height;
-                ctx.strokeRect(canvas.width / 2 - boxWidth / 2, canvas.height / 2 - boxHeight / 2, boxWidth, boxHeight);
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.font = boxWidth / 10 + 'px' + " Comic Sans MS";
-                ctx.fillText("Scan marker here", 0, 0);
-                switch (type) {
-                    case 'hint_mobile':
-                        ctx.scale(-1, 1);
-                        break;
-                    case 'hint_mobile_portraint':
-                        ctx.scale(-1, 1);
-                        ctx.rotate(Math.PI / 2);
-                        break;
+                if (isPortraint)
+                    ctx.strokeRect(-canvas.width, 0, canvas.width, canvas.height)
+                else
+                    ctx.strokeRect(0, 0, canvas.width, canvas.height)
+                if (isFirstSetTypeContext) {
+                    console.log('here')
+                    switch (type) {
+                        case 'hint_mobile':
+                        case 'hint_mobile_portraint':
+                            ctx.scale(-1, 1);
+                            break;
+                    }
+                    isFirstSetTypeContext = false;
                 }
+                if (isPortraint)
+                    ctx.rotate(Math.PI / 2);
+                ctx.font = boxWidth / 10 + 'px' + " samsung";
+                ctx.fillText("Scan marker here", boxWidth / 2, boxHeight / 2);
+                if (isPortraint)
+                    ctx.rotate(-Math.PI / 2); // revert rotation for the next setContext
             } else {
                 typeContext = 'info';
                 ctx.fillStyle = "#9ea7b8";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillRect(-canvas.width, -canvas.height, canvas.width * 2, canvas.height * 2);
                 ctx.lineWidth = 10;
 
-                var boxWidth = canvas.width;
-                var boxHeight = canvas.height;
-                ctx.strokeRect(canvas.width / 2 - boxWidth / 2, canvas.height / 2 - boxHeight / 2, boxWidth, boxHeight);
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                var textSize = boxWidth / 20;
-                ctx.font = textSize + 'px' + " Comic Sans MS";
+                console.log(boxWidth, boxHeight)
+                ctx.strokeRect(0, 0, canvas.width, canvas.height);
+                if (isPortraint)
+                    var textSize = boxHeight / 20;
+                else
+                    var textSize = boxWidth / 20;
+                ctx.font = textSize + 'px samsung';
                 ctx.fillStyle = "white";
                 ctx.textAlign = "center";
                 switch (type) {
@@ -175,46 +207,49 @@
                     case 'info_camera':
                         drawContent(list_Camera_Content, boxWidth, textSize);
                         break;
-
+                    case 'info_back':
+                        drawContent(list_Back_Content, boxWidth, textSize);
+                        break;
                 }
+                planeBox.visible = true;
             }
-
 
         }
 
         /**
-        	Creates a Three.js scene for use with this ARController.
+            Creates a Three.js scene for use with this ARController.
 
-        	Returns a ThreeARScene object that contains two THREE.js scenes (one for the video image and other for the 3D scene)
-        	and a couple of helper functions for doing video frame processing and AR rendering.
+            Returns a ThreeARScene object that contains two THREE.js scenes (one for the video image and other for the 3D scene)
+            and a couple of helper functions for doing video frame processing and AR rendering.
 
-        	Here's the structure of the ThreeARScene object:
-        	{
-        		scene: THREE.Scene, // The 3D scene. Put your AR objects here.
-        		camera: THREE.Camera, // The 3D scene camera.
+            Here's the structure of the ThreeARScene object:
+            {
+                scene: THREE.Scene, // The 3D scene. Put your AR objects here.
+                camera: THREE.Camera, // The 3D scene camera.
 
-        		arController: ARController,
+                arController: ARController,
 
-        		video: HTMLVideoElement, // The userMedia video element.
+                video: HTMLVideoElement, // The userMedia video element.
 
-        		videoScene: THREE.Scene, // The userMedia video image scene. Shows the video feed.
-        		videoCamera: THREE.Camera, // Camera for the userMedia video scene.
+                videoScene: THREE.Scene, // The userMedia video image scene. Shows the video feed.
+                videoCamera: THREE.Camera, // Camera for the userMedia video scene.
 
-        		process: function(), // Process the current video frame and update the markers in the scene.
-        		renderOn: function( THREE.WebGLRenderer ) // Render the AR scene and video background on the given Three.js renderer.
-        	}
+                process: function(), // Process the current video frame and update the markers in the scene.
+                renderOn: function( THREE.WebGLRenderer ) // Render the AR scene and video background on the given Three.js renderer.
+            }
 
-        	You should use the arScene.video.videoWidth and arScene.video.videoHeight to set the width and height of your renderer.
+            You should use the arScene.video.videoWidth and arScene.video.videoHeight to set the width and height of your renderer.
 
-        	In your frame loop, use arScene.process() and arScene.renderOn(renderer) to do frame processing and 3D rendering, respectively.
+            In your frame loop, use arScene.process() and arScene.renderOn(renderer) to do frame processing and 3D rendering, respectively.
 
-        	@param video Video image to use as scene background. Defaults to this.image
+            @param video Video image to use as scene background. Defaults to this.image
         */
         var isShow = false; // check if marker is detected isShow will be true else false
         var planeBox; // plane object of THREE for show "Scan marker here"
         var planeBow, planeArcher; // plane for the Bow and Archer infomation
         var global_scene; // save scene to global for use in setUpThree
         var global_arcontroller; // save arcontroller to global for use in setUpThree
+        var isUnbox = false; // flag for check event unbox
 
         /**
          * This function create element of THREE: plane, scene, camera,light, ...
@@ -246,7 +281,7 @@
             plane.material.depthWrite = false;
 
             var texture = new THREE.CanvasTexture(document.getElementById('boxCanvas'));
-            texture.needsUpdate = true;
+            // texture.needsUpdate = true;
             // texture.wrapS = THREE.RepeatWrapping;
             // // texture.repeat.x = -1;
             // // texture.rotation.x = Math.PI;
@@ -254,12 +289,12 @@
 
             // create plane for "Scan marker here" box
             var scale = typeContext == 'hint' ? -1 : -1.5; // scale of plane for scan marker here or info mobile
-            console.log(typeContext)
-            var planeB = new THREE.Mesh(
+            //TODO: set scale for plane with type of context
+            planeBox = new THREE.Mesh(
                 new THREE.PlaneBufferGeometry(scale, scale),
                 new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true })
             );
-            planeBox = planeB;
+            // planeBox.material.map.needsUpdate = true;
 
             ////////// Create texture and plane for bow //////////
             var bowTexture = new THREE.TextureLoader().load("/resources/image/bow-arrow-png-7.png");
@@ -301,7 +336,7 @@
             videoScene.background = new THREE.Color(0x000000);
 
             videoScene.add(plane);
-            videoScene.add(planeB);
+            videoScene.add(planeBox);
 
             videoScene.add(planeBow);
             videoScene.add(planeArcher);
@@ -323,6 +358,13 @@
 
             setProjectionMatrix(camera.projectionMatrix, matrix);
 
+            /**
+             * set Unbox flag, the flag is set at the main.js when trigger the canvas
+             */
+            var setUnboxFlag = function(flag) {
+                if (isGetMarker)
+                    isUnbox = flag;
+            }
 
             var self = this;
             var count = 0;
@@ -345,12 +387,14 @@
                 planeBow: planeBow, // public plane of Bow
                 planeArcher: planeArcher, // public plane of Archer
                 planeBox: planeBox, //public plane box (of hint and info)
+                setUnboxFlag: setUnboxFlag,
 
                 /**
                  * Process function, check if model detected it will be visible
                  * This call the process function for detect marker in three.min.js
                  */
                 process: function() {
+
                     if (isShow)
                         for (var i in self.threeNFTMarkers) {
                             self.threeNFTMarkers[i].visible = true;
@@ -375,7 +419,8 @@
                  * @param {any} renderer - THREE.WebGLRenderer object
                  */
                 renderOn: function(renderer) {
-
+                    animate();
+                    texture.needsUpdate = true; // need to update the Canvas Texture in a loop
                     videoTex.needsUpdate = true;
                     var ac = renderer.autoClear;
                     renderer.autoClear = false;
@@ -392,20 +437,20 @@
 
 
         /**
-        	Creates a Three.js marker Object3D for the given NFT marker UID.
-        	The marker Object3D tracks the NFT marker when it's detected in the video.
+            Creates a Three.js marker Object3D for the given NFT marker UID.
+            The marker Object3D tracks the NFT marker when it's detected in the video.
 
-        	Use this after a successful artoolkit.loadNFTMarker call:
+            Use this after a successful artoolkit.loadNFTMarker call:
 
-        	arController.loadNFTMarker('DataNFT/pinball', function(markerUID) {
-        		var markerRoot = arController.createThreeNFTMarker(markerUID);
-        		markerRoot.add(myFancyModel);
-        		arScene.scene.add(markerRoot);
-        	});
+            arController.loadNFTMarker('DataNFT/pinball', function(markerUID) {
+                var markerRoot = arController.createThreeNFTMarker(markerUID);
+                markerRoot.add(myFancyModel);
+                arScene.scene.add(markerRoot);
+            });
 
-        	@param {number} markerUID The UID of the marker to track.
-        	@param {number} markerWidth The width of the marker, defaults to 1.
-        	@return {THREE.Object3D} Three.Object3D that tracks the given marker.
+            @param {number} markerUID The UID of the marker to track.
+            @param {number} markerWidth The width of the marker, defaults to 1.
+            @return {THREE.Object3D} Three.Object3D that tracks the given marker.
         */
         ARController.prototype.createThreeNFTMarker = function(markerUID, markerWidth) {
             this.setupThree();
@@ -417,6 +462,8 @@
         };
 
         var first = true; // check is the first get marker
+        var isDoneAnimation = false; // check is animation of box Done
+        var isGetMarker = false; // check marker is get
 
         ARController.prototype.setupThree = function() {
             if (this.THREE_JS_ENABLED) {
@@ -425,51 +472,57 @@
             this.THREE_JS_ENABLED = true;
 
             /*
-            	Listen to getNFTMarker events to keep track of Three.js markers.
+                Listen to getNFTMarker events to keep track of Three.js markers.
             */
             this.addEventListener('getNFTMarker', function(ev) {
-                isShow = true;
+
                 if (typeContext == 'hint')
                     planeBox.visible = false;
                 var marker = ev.data.marker;
+                isGetMarker = true;
                 var obj;
 
                 obj = this.threeNFTMarkers[ev.data.marker.id];
 
                 if (obj) {
-                    {
-                        obj.matrix.fromArray(ev.data.matrixGL_RH);
-                        obj.visible = true;
-                        preMatrix = ev.data.matrixGL_RH;
-                    }
+                    obj.matrix.fromArray(ev.data.matrixGL_RH);
+                    obj.visible = true;
+                    preMatrix = ev.data.matrixGL_RH;
+                    var box;
                     if (first && obj.children.length >= 2) {
                         if (obj.children[0].name == 'mobile') {
                             var temp = obj.children[0];
                             obj.children[0] = obj.children[1];
                             obj.children[1] = temp;
                         }
+                        box = obj.children[0].children[2];
+                    }
+                    if (isDoneAnimation == true)
+                        isShow = true;
+                    if (isUnbox) {
                         first = false;
-                        var box = obj.children[0].children[2];
-                        window['box'] = box;
                         if (box) {
                             /**
                              * interval to create animtion for box
                              */
                             var interval = setInterval(function() {
-                                var delta = 2;
+                                var delta = 1;
                                 box.children[0].position.y += delta;
                                 box.children[1].position.y -= delta;
                                 box.children[2].position.y -= delta;
 
                                 if (Math.abs(box.children[1].position.y - box.children[0].position.y) >= 50) {
                                     clearInterval(interval);
+                                    runPartical();
                                     box.visible = false;
+                                    isShow = true;
+                                    isDoneAnimation = true;
                                     var mobile = obj.children[1].children[2];
                                     window['mobile'] = mobile;
                                     var mobileInterval = setInterval(function() {
                                         var modelCenterZ = mobile.scale.x / 10;
                                         mobile.translateZ(modelCenterZ);
-                                        var delta = 0.1;
+                                        var delta = 0.02;
                                         if (mobile.rotation.x < Math.PI)
                                             mobile.rotation.x += delta;
                                         if (mobile.rotation.z < Math.PI * 2)
@@ -478,9 +531,9 @@
                                         if (mobile.rotation.x >= Math.PI && mobile.rotation.z >= Math.PI * 2)
                                             clearInterval(mobileInterval);
 
-                                    }, 50);
+                                    }, 25);
                                 }
-                            }, 100)
+                            }, 50)
                         }
                     }
                 }
@@ -606,7 +659,7 @@
             });
 
             /**
-            	Index of Three.js NFT markers, maps markerID -> THREE.Object3D.
+                Index of Three.js NFT markers, maps markerID -> THREE.Object3D.
             */
             this.threeNFTMarkers = {};
 

@@ -14,25 +14,29 @@
  * @param {String} modelUri - link to .gltf file model (this can be link raw github or link to folder local)
  **/
 function initAR(modelUri) {
+    var canvasMaster = document.getElementById('renderCanvas');
     var divLoading = document.createElement('div');
     divLoading.id = 'divLoading';
     divLoading.className = "loading";
-    document.getElementById('renderCanvas').appendChild(divLoading);
-    // document.getElementById('renderCanvas').className = 'main';
+    canvasMaster.appendChild(divLoading);
+    // canvasMaster.className = 'main';
     var boxCanvas = document.createElement('canvas');
     boxCanvas.id = 'boxCanvas';
     boxCanvas.className = "boxCanvas";
     boxCanvas.style.transform = "scale(1,1)";
-    boxCanvas.width = document.getElementById('renderCanvas').offsetWidth;
-    boxCanvas.height = parseFloat(boxCanvas.width) * 0.75;
-    document.getElementById('renderCanvas').appendChild(boxCanvas);
+    // boxCanvas.width = canvasMaster.offsetWidth;
+    // boxCanvas.height = parseFloat(boxCanvas.width) * 0.75;
+    boxCanvas.width = 4096;
+    boxCanvas.height = 2048;
+    canvasMaster.appendChild(boxCanvas);
     boxCanvas.style.display = 'none';
+    boxCanvas.getContext("2d").font = '10px samsung';
 
     var info = document.createElement('div');
     info.id = 'info';
     info.className = 'info';
     info.textContent = 'info';
-    document.getElementById('renderCanvas').appendChild(info);
+    canvasMaster.appendChild(info);
 
     // boxCanvas.style.width = '100%';
     // boxCanvas.style.height = (0.75 * boxCanvas.offsetWidth).toString() + 'px';
@@ -76,11 +80,13 @@ function initAR(modelUri) {
                 renderer.domElement.className = 'renderCanvas';
                 renderer.domElement.id = 'renderCanvasContext';
                 // renderer.domElement.style.width = '100%';
-                document.getElementById('renderCanvas').appendChild(renderer.domElement);
+                canvasMaster.appendChild(renderer.domElement);
 
                 // boxCanvas.width = renderer.domElement.width;
                 // boxCanvas.height = renderer.domElement.height;
                 // boxCanvas.style.top = renderer.domElement.height / 2 - boxCanvas.height / 2;
+
+                var hint_Content = ""; // save type of hint
 
                 ////////// setup for mobile version //////////
                 if (arController.orientation === 'portrait') {
@@ -88,17 +94,20 @@ function initAR(modelUri) {
                     var h = window.innerWidth;
                     renderer.setSize(w, h);
                     // renderer.domElement.style.paddingBottom = (w - h) + 'px';
-                    // document.getElementById('renderCanvas').style.transform = 'rotate(-90deg)';
-                    arScene.setContext('hint_mobile_portraint');
+                    // canvasMaster.style.transform = 'rotate(-90deg)';
 
-                    document.getElementById('renderCanvasContext').style.height = document.getElementById('renderCanvas').offsetWidth + 'px';
-                    document.getElementById('renderCanvasContext').style.width = parseFloat(document.getElementById('renderCanvas').offsetWidth) / 0.75 + 'px';
-                    document.getElementById('renderCanvas').style.marginBottom = '15%';
-                    document.getElementById('renderCanvas').style.marginLeft = '-23%';
-                    document.getElementById('renderCanvasContext').style.marginTop = '15%';
-                    document.getElementById('divLoading').style.width = document.getElementById('renderCanvasContext').offsetHeight + 'px';
-                    document.getElementById('divLoading').style.height = document.getElementById('renderCanvasContext').offsetWidth + 'px';
-                    document.getElementById('divLoading').style.marginLeft = '17%';
+                    renderer.domElement.style.height = canvasMaster.offsetWidth + 'px';
+                    renderer.domElement.style.width = parseFloat(canvasMaster.offsetWidth) / 0.75 + 'px';
+                    canvasMaster.style.marginBottom = '15%';
+                    canvasMaster.style.marginLeft = '-23%';
+                    renderer.domElement.style.marginTop = '15%';
+                    divLoading.style.width = renderer.domElement.offsetHeight + 'px';
+                    divLoading.style.height = renderer.domElement.offsetWidth + 'px';
+                    divLoading.style.marginLeft = '17%';
+                    // boxCanvas.width = 2048;
+                    // boxCanvas.height = 4096;
+                    arScene.setContext('hint_mobile_portraint');
+                    hint_Content = 'hint_mobile_portraint';
 
                 } else {
                     ///////////// setup for mobile has not portrait mode //////////
@@ -110,28 +119,30 @@ function initAR(modelUri) {
                         renderer.setSize(w, h);
 
                         arScene.setContext('hint_mobile');
+                        hint_Content = 'hint_mobile';
                     }
 
                     /////////////// Setup For Desktop ////////////////
                     else {
                         renderer.setSize(arController.videoWidth, arController.videoHeight);
                         document.body.className += ' desktop';
-                        // document.getElementById('renderCanvas').style.transform = 'scale(-1,1)';
+                        // canvasMaster.style.transform = 'scale(-1,1)';
                         arScene.setContext('hint_desktop');
+                        hint_Content = 'hint_desktop';
                         // arScene.setContext('info_camera');
                     }
-                    // document.getElementById('renderCanvasContext').style.width = '100%';
-                    // document.getElementById('renderCanvasContext').style.height = (0.75 * document.getElementById('renderCanvasContext').offsetWidth) + 'px';
+                    // renderer.domElement.style.width = '100%';
+                    // renderer.domElement.style.height = (0.75 * renderer.domElement.offsetWidth) + 'px';
 
 
-                    document.getElementById('renderCanvasContext').style.height = '100%';
-                    document.getElementById('renderCanvasContext').style.position = 'absolute';
-                    document.getElementById('renderCanvasContext').style.width = (document.getElementById('renderCanvasContext').offsetHeight / 0.75) + 'px';
-                    document.getElementById('divLoading').style.width = document.getElementById('renderCanvasContext').offsetWidth + 'px';
-                    document.getElementById('divLoading').style.height = document.getElementById('renderCanvasContext').offsetHeight + 'px';
-                    document.getElementById('divLoading').style.margin = 'auto';
-                    document.getElementById('divLoading').style.left = '0';
-                    document.getElementById('divLoading').style.right = '0';
+                    renderer.domElement.style.height = '100%';
+                    renderer.domElement.style.position = 'absolute';
+                    renderer.domElement.style.width = (renderer.domElement.offsetHeight / 0.75) + 'px';
+                    divLoading.style.width = renderer.domElement.offsetWidth + 'px';
+                    divLoading.style.height = renderer.domElement.offsetHeight + 'px';
+                    divLoading.style.margin = 'auto';
+                    divLoading.style.left = '0';
+                    divLoading.style.right = '0';
 
                 }
 
@@ -184,6 +195,7 @@ function initAR(modelUri) {
                  * @param {event} ev - event mouse down
                  */
                 renderer.domElement.addEventListener('mousedown', function(ev) {
+                    arScene.setUnboxFlag(true);
                     if (arScene.isInteract()) {
                         preMousePos = getMousePos(renderer.domElement, ev);
                         isRotate = true
@@ -234,6 +246,7 @@ function initAR(modelUri) {
                         isRotate = false;
                     }
                     clearPickPosition();
+                    arScene.setContext(hint_Content);
                 }, false);
 
                 /**
@@ -262,6 +275,7 @@ function initAR(modelUri) {
                  * @param {event} ev - event touch on mobile
                  */
                 renderer.domElement.addEventListener('touchstart', function(ev) {
+                    arScene.setUnboxFlag(true);
                     if (arScene.isInteract()) {
                         if (ev.touches.length > 1) {
                             finger_dist = get_distance(ev);
@@ -310,6 +324,7 @@ function initAR(modelUri) {
                     if (arScene.isInteract()) {
                         isRotate = false;
                     }
+                    arScene.setContext(hint_Content);
                 }, false);
                 ////////////////////////////////
 
@@ -360,14 +375,16 @@ function initAR(modelUri) {
                             switch (this.pickedObject.name) {
                                 case 'Mesh_0':
                                     arScene.setContext('info_front');
-                                    arScene.planeBox.visible = true;
                                     break;
                                 case 'Mesh.010_0':
                                     arScene.setContext('info_camera');
-                                    arScene.planeBox.visible = true;
+                                    break;
+                                case "Mesh.008_0":
+                                    arScene.setContext('info_back');
                                     break;
                                 default:
-                                    arScene.setContext('hint_desktop');
+                                    arScene.setContext(hint_Content);
+                                    break;
                             }
                             // if (this.pickedObject.name == 'Mesh_0') {
                             //     // document.getElementById('info').textContent = 'Bow';
@@ -468,6 +485,11 @@ function initAR(modelUri) {
                 sphereCamera.position.set(0, 100, 0);
                 // arScene.scene.add(sphereCamera);
 
+                /**
+                 * set enviroment for partical
+                 */
+                setStage(renderer, arScene.scene, arScene.camera);
+
                 ///////// Load NFT data /////////////
                 /**
                  * When load NFT of marker success, we will create a root object for add model to THREE
@@ -548,7 +570,7 @@ function initAR(modelUri) {
                                      */
                                     var object = gltf.scene;
                                     var box = new THREE.Box3().setFromObject(object);
-                                    var scale = 20 / box.getSize().x;
+                                    var scale = 18 / box.getSize().x;
                                     modelScale = scale;
 
                                     // if (arController.orientation === 'portrait')
@@ -560,7 +582,7 @@ function initAR(modelUri) {
                                     // object.position.y = 3.9394508004188538;
                                     object.position.z = -0;
                                     object.position.x = 25;
-                                    object.position.y = 30;
+                                    object.position.y = 32;
 
                                     object.scale.set(scale, scale, scale);
                                     // object.scale.set(0.5, 0.5, 0.5);
@@ -600,7 +622,8 @@ function initAR(modelUri) {
                                 }, 0)
                                 window['arScene'] = arScene;
 
-                                document.getElementById('divLoading').style.display = "none";
+                                divLoading.style.display = "none";
+                                arScene.setContext(hint_Content)
                             }, function(xhr) {
 
                                 console.log((xhr.loaded / (xhr.total + xhr.loaded) * 100 * 2) + '% loaded');
