@@ -355,7 +355,7 @@ function initAR(modelUri) {
                         // the 'true' pram is used for check detail of model
                         const intersectedObjects = this.raycaster.intersectObjects(arScene.scene.children, true);
 
-                        if (intersectedObjects.length) {
+                        if (intersectedObjects.length > 0) {
                             // pick the first object. It's the closest one
                             this.pickedObject = intersectedObjects[0].object;
                             // save its color
@@ -488,7 +488,7 @@ function initAR(modelUri) {
                 /**
                  * set enviroment for partical
                  */
-                setStage(renderer, arScene.scene, arScene.camera);
+                setStage(renderer, arScene.videoScene, arScene.videoCamera);
 
                 ///////// Load NFT data /////////////
                 /**
@@ -624,6 +624,7 @@ function initAR(modelUri) {
 
                                 divLoading.style.display = "none";
                                 arScene.setContext(hint_Content)
+
                             }, function(xhr) {
 
                                 console.log((xhr.loaded / (xhr.total + xhr.loaded) * 100 * 2) + '% loaded');

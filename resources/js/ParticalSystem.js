@@ -16,17 +16,19 @@ var renderer;
 var colors = ['#da6b00', '#8555d4', '#4ad3b5', '#ffffff'];
 var particleCount = 500;
 var initialRadius = 0.1;
-var movementSpeed = 2;
+var movementSpeed = 0.5;
 var directions = [];
 var starSystems = [];
 var systemCount = 1;
 
 function runPartical() {
-    setActors();
+    // setActors();
+    addStars(getPastelColor(), 0, 0);
     var interval = setInterval(() => {
+        console.log('runpartical')
         systemCount++;
         addStars(getPastelColor(), 0, 0);
-        if (systemCount >= 700)
+        if (systemCount >= 5)
             clearInterval(interval);;
     }, 1000);
 }
@@ -52,8 +54,8 @@ function setStage(_renderer, _scene, _camera) {
 function getTexture(color) {
     var canvas, context, gradient, texture;
     canvas = document.createElement('canvas');
-    canvas.width = 32;
-    canvas.height = 32;
+    canvas.width = 1024;
+    canvas.height = 1024;
     context = canvas.getContext('2d');
     gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
     gradient.addColorStop(0, 'rgba(255,255,255,1)');
@@ -68,13 +70,12 @@ function getTexture(color) {
 }
 
 function addStars(color, x, y) {
-    console.log('addStart')
     var angle, i, k, radiusSQ, ref, vertex;
     var dirs = [];
     var geometry = new THREE.Geometry();
     var materials = new THREE.PointsMaterial({
         color: color,
-        size: 1,
+        size: 10,
         transparent: true,
         blending: THREE.AdditiveBlending,
         map: getTexture(color),
@@ -87,11 +88,11 @@ function addStars(color, x, y) {
         vertex = new THREE.Vector3();
         vertex.x = x;
         vertex.y = y;
-        vertex.z = 0;
+        vertex.z = -100;
         dirs.push({
             x: (Math.random() * movementSpeed) - (movementSpeed / 2),
             y: (Math.random() * movementSpeed) - (movementSpeed / 2),
-            z: (Math.random() * movementSpeed) - (movementSpeed / 2)
+            z: ((Math.random() * movementSpeed) - (movementSpeed / 2))
         });
         geometry.vertices.push(vertex);
     }
@@ -107,14 +108,13 @@ function getPastelColor() {
     return `#${col.getHexString()}`;
 }
 
-function setActors() {
-    return addStars(this.getPastelColor(), 0, 0);
-}
+// function setActors() {
+//     return addStars(this.getPastelColor(), 100, 100);
+// }
 
 
 function animate() {
     if (starSystems[0]) {
-        console.log('render')
         var i, j, k, l, particle, ref, ref1;
         for (j = k = 0, ref = systemCount - 1;
             (0 <= ref ? k <= ref : k >= ref); j = 0 <= ref ? ++k : --k) {

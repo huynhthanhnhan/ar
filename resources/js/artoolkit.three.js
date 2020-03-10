@@ -131,7 +131,7 @@
          */
         var createContext = function(type) {
             var renderCanvas = document.getElementById('renderCanvasContext');
-            console.log('set')
+            // console.log('set')
             var canvas = document.getElementById("boxCanvas");
             var ctx = canvas.getContext("2d");
             ctx.clearRect(-canvas.width, -canvas.height, canvas.width * 2, canvas.height * 2);
@@ -331,7 +331,8 @@
 
             // Create a camera and a scene for the video plane and
             // add the camera and the video plane to the scene.
-            var videoCamera = new THREE.OrthographicCamera(-1, 1, -1, 1, -1, 1);
+            // var videoCamera = new THREE.OrthographicCamera(window.innerWidth / -50, window.innerWidth / 50, window.innerHeight / 50, window.innerHeight / -50, -500, 1000);
+            var videoCamera = new THREE.OrthographicCamera(-1, 1, -1, 1, -500, 1000);
             var videoScene = new THREE.Scene();
             videoScene.background = new THREE.Color(0x000000);
 
@@ -419,7 +420,6 @@
                  * @param {any} renderer - THREE.WebGLRenderer object
                  */
                 renderOn: function(renderer) {
-                    animate();
                     texture.needsUpdate = true; // need to update the Canvas Texture in a loop
                     videoTex.needsUpdate = true;
                     var ac = renderer.autoClear;
@@ -430,6 +430,7 @@
                     // render model from root, light, ... added in main.js file
                     renderer.render(this.scene, this.camera);
                     renderer.autoClear = ac;
+                    animate();
                 }
 
             };
