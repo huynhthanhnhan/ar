@@ -1,6 +1,6 @@
 /* THREE.js ARToolKit integration */
 
-;
+var setContent;
 (function() {
     var integrate = function() {
         /**
@@ -129,7 +129,7 @@
          * 
          * @param {String} type - type of context
          */
-        var createContext = function(type) {
+        var createContext = function(type, content) {
             var renderCanvas = document.getElementById('renderCanvasContext');
             // console.log('set')
             var canvas = document.getElementById("boxCanvas");
@@ -182,12 +182,13 @@
                 if (isPortraint)
                     ctx.rotate(Math.PI / 2);
                 ctx.font = boxWidth / 10 + 'px' + " samsung";
-                ctx.fillText("Scan marker here", boxWidth / 2, boxHeight / 2);
+                var content = content ? content : 'Scan marker here';
+                ctx.fillText(content, boxWidth / 2, boxHeight / 2);
                 if (isPortraint)
                     ctx.rotate(-Math.PI / 2); // revert rotation for the next setContext
             } else {
                 typeContext = 'info';
-                ctx.fillStyle = "#9ea7b8";
+                ctx.fillStyle = "#0d41a3";
                 ctx.fillRect(-canvas.width, -canvas.height, canvas.width * 2, canvas.height * 2);
                 ctx.lineWidth = 10;
 
@@ -214,6 +215,8 @@
             }
 
         }
+
+        setContent = createContext;
 
         /**
             Creates a Three.js scene for use with this ARController.
@@ -465,6 +468,7 @@
         var isDoneAnimation = false; // check is animation of box Done
         var isGetMarker = false; // check marker is get
 
+
         const interpolationFactor = 5; // delta time for make stable
 
         var trackedMatrix = {
@@ -507,12 +511,16 @@
                     /**
                      * make stable matrix
                      */
-                    var array = ev.data.matrixGL_RH;
+                    var array = ev.data.matrixGL_RH; // get the result matrix from detect
                     for (let i = 0; i < 16; i++) {
                         trackedMatrix.delta[i] = array[i] - trackedMatrix.interpolated[i];
                         trackedMatrix.interpolated[i] = trackedMatrix.interpolated[i] + (trackedMatrix.delta[i] / interpolationFactor);
                     }
-                    setProjectionMatrix(obj.matrix, trackedMatrix.interpolated);
+                    setProjectionMatrix(obj.matrix, trackedMatrix.interpolated); // set the interpolate matrix to object
+                    //TODO: use interpolate to set matrix
+                    //arg: from the new and old matrix detect, if the change of them is large, we need to  reset the matrix before set for model matrix to make it stable
+                    //requires: we need two 4x4 matrix to store the old matrix and the delta matrix. From the delta matrix and interpolation factor, reset the matrix detected
+
                     ///////////////////////////
 
                     // obj.matrix.fromArray(ev.data.matrixGL_RH);
@@ -552,7 +560,7 @@
                                     var mobileInterval = setInterval(function() {
                                         var modelCenterZ = mobile.scale.x / 10;
                                         mobile.translateZ(modelCenterZ);
-                                        var delta = 0.02;
+                                        var delta = 0.04;
                                         if (mobile.rotation.x < Math.PI)
                                             mobile.rotation.x += delta;
                                         if (mobile.rotation.z < Math.PI * 2)
