@@ -170,7 +170,7 @@
                 else
                     ctx.strokeRect(0, 0, canvas.width, canvas.height)
                 if (isFirstSetTypeContext) {
-                    console.log('here')
+                    // console.log('here')
                     switch (type) {
                         case 'hint_mobile':
                         case 'hint_mobile_portraint':
@@ -191,7 +191,6 @@
                 ctx.fillRect(-canvas.width, -canvas.height, canvas.width * 2, canvas.height * 2);
                 ctx.lineWidth = 10;
 
-                console.log(boxWidth, boxHeight)
                 ctx.strokeRect(0, 0, canvas.width, canvas.height);
                 if (isPortraint)
                     var textSize = boxHeight / 20;
@@ -466,6 +465,24 @@
         var isDoneAnimation = false; // check is animation of box Done
         var isGetMarker = false; // check marker is get
 
+        const interpolationFactor = 5; // delta time for make stable
+
+        var trackedMatrix = {
+            // for interpolation
+            delta: [
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0
+            ],
+            interpolated: [
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0
+            ]
+        }
+
         ARController.prototype.setupThree = function() {
             if (this.THREE_JS_ENABLED) {
                 return;
@@ -486,7 +503,19 @@
                 obj = this.threeNFTMarkers[ev.data.marker.id];
 
                 if (obj) {
-                    obj.matrix.fromArray(ev.data.matrixGL_RH);
+
+                    /**
+                     * make stable matrix
+                     */
+                    var array = ev.data.matrixGL_RH;
+                    for (let i = 0; i < 16; i++) {
+                        trackedMatrix.delta[i] = array[i] - trackedMatrix.interpolated[i];
+                        trackedMatrix.interpolated[i] = trackedMatrix.interpolated[i] + (trackedMatrix.delta[i] / interpolationFactor);
+                    }
+                    setProjectionMatrix(obj.matrix, trackedMatrix.interpolated);
+                    ///////////////////////////
+
+                    // obj.matrix.fromArray(ev.data.matrixGL_RH);
                     obj.visible = true;
                     preMatrix = ev.data.matrixGL_RH;
                     var box;
@@ -671,10 +700,19 @@
      * Helper Method for Three.js compatibility
      */
     var setProjectionMatrix = function(projectionMatrix, value) {
+        // if (typeof projectionMatrix.elements.set === "function") {
+        //     projectionMatrix.elements.set(value);
+        // } else {
+        //     projectionMatrix.elements = [].slice.call(value);
+        // }
+        let array = [];
+        for (let key in value) {
+            array[key] = value[key];
+        }
         if (typeof projectionMatrix.elements.set === "function") {
-            projectionMatrix.elements.set(value);
+            projectionMatrix.elements.set(array);
         } else {
-            projectionMatrix.elements = [].slice.call(value);
+            projectionMatrix.elements = [].slice.call(array);
         }
     };
 

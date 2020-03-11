@@ -369,7 +369,7 @@ function initAR(modelUri) {
                             // document.getElementById('info').style.display = 'block';
                             // document.getElementById('info').style.left = clientPos.x;
                             // document.getElementById('info').style.top = clientPos.y;
-                            console.log(this.pickedObject.name)
+                            // console.log(this.pickedObject.name)
 
                             /////////// Check part of model with name /////////
                             switch (this.pickedObject.name) {

@@ -20,16 +20,20 @@ var movementSpeed = 0.5;
 var directions = [];
 var starSystems = [];
 var systemCount = 1;
+var isPlay = true;
+var isRemove = true;
 
 function runPartical() {
     // setActors();
     addStars(getPastelColor(), 0, 0);
     var interval = setInterval(() => {
-        console.log('runpartical')
+        // console.log('runpartical')
         systemCount++;
         addStars(getPastelColor(), 0, 0);
-        if (systemCount >= 5)
-            clearInterval(interval);;
+        if (systemCount >= 6) {
+            clearInterval(interval);
+            isPlay = false;
+        }
     }, 1000);
 }
 
@@ -57,7 +61,7 @@ function getTexture(color) {
     canvas.width = 1024;
     canvas.height = 1024;
     context = canvas.getContext('2d');
-    gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+    gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 3);
     gradient.addColorStop(0, 'rgba(255,255,255,1)');
     gradient.addColorStop(0.2, color);
     gradient.addColorStop(0.4, color);
@@ -97,6 +101,7 @@ function addStars(color, x, y) {
         geometry.vertices.push(vertex);
     }
     var starSystem = new THREE.Points(geometry, materials);
+    starSystem.name = 'point'
     starSystem.sortParticles = true;
     directions.push(dirs);
     starSystems.push(starSystem);
@@ -104,7 +109,7 @@ function addStars(color, x, y) {
 }
 
 function getPastelColor() {
-    var col = new THREE.Color(`hsl(${random(0, 360)}, ${Math.floor(25 + 70 * Math.random())}%, ${Math.floor(85 + 10 * Math.random())}%)`);
+    var col = new THREE.Color(`hsl(${random(0, 360)}, ${Math.floor(25 + 70 * Math.random())}%, ${Math.floor(10 + 10 * Math.random())}%)`);
     return `#${col.getHexString()}`;
 }
 
@@ -114,7 +119,7 @@ function getPastelColor() {
 
 
 function animate() {
-    if (starSystems[0]) {
+    if (starSystems[0] && isPlay) {
         var i, j, k, l, particle, ref, ref1;
         for (j = k = 0, ref = systemCount - 1;
             (0 <= ref ? k <= ref : k >= ref); j = 0 <= ref ? ++k : --k) {
@@ -129,6 +134,17 @@ function animate() {
         }
         // renderer.render(scene, camera);
 
+    } else {
+        if (isRemove && !isPlay) {
+            var length = scene.children.length;
+            for (var i = 0; i < scene.children.length; i++) {
+                if (scene.children[i].name == 'point') {
+                    scene.remove(scene.children[i]);
+                }
+            }
+            if (scene.children.length == length)
+                isRemove = false
+        }
     }
 }
 
