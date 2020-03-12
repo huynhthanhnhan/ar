@@ -505,7 +505,6 @@ var setContent;
                 var obj;
 
                 obj = this.threeNFTMarkers[ev.data.marker.id];
-
                 if (obj) {
 
                     /**
@@ -516,7 +515,19 @@ var setContent;
                         trackedMatrix.delta[i] = array[i] - trackedMatrix.interpolated[i];
                         trackedMatrix.interpolated[i] = trackedMatrix.interpolated[i] + (trackedMatrix.delta[i] / interpolationFactor);
                     }
-                    setProjectionMatrix(obj.matrix, trackedMatrix.interpolated); // set the interpolate matrix to object
+
+                    /**
+                     * check if from the lost tracking, the matrix will not set from interpolate
+                     */
+                    if (isShow || !isDoneAnimation)
+                        setProjectionMatrix(obj.matrix, trackedMatrix.interpolated); // set the interpolate matrix to object
+                    else {
+                        setProjectionMatrix(obj.matrix, array);
+                        for (let i = 0; i < 16; i++) {
+                            trackedMatrix.delta[i] = 0;
+                            trackedMatrix.interpolated[i] = array[i];
+                        }
+                    }
                     //TODO: use interpolate to set matrix
                     //arg: from the new and old matrix detect, if the change of them is large, we need to  reset the matrix before set for model matrix to make it stable
                     //requires: we need two 4x4 matrix to store the old matrix and the delta matrix. From the delta matrix and interpolation factor, reset the matrix detected
@@ -575,104 +586,6 @@ var setContent;
                         }
                     }
                 }
-
-                /**
-                 * Check the first check model for run animation
-                 */
-                // if (first) {
-                //     isShow = true;
-                //     var obj = this.threeNFTMarkers[ev.data.marker.id];
-                //     if (obj) {
-                //         {
-                //             obj.matrix.fromArray(ev.data.matrixGL_RH);
-                //             obj.visible = true;
-                //             preMatrix = ev.data.matrixGL_RH;
-                //         }
-                //     }
-                //     /**
-                //      * Get the object root which contain the model. The variable mobile is model
-                //      */
-                //     var objectRoot = global_scene.getObjectByName('rootObject');
-                //     var mobile = objectRoot.children[0];
-
-                //     var object = global_scene.getObjectByName('box');
-                //     var box;
-                //     if (object)
-                //         box = obj.children[0];
-                //     if (box) {
-                //         /**
-                //          * interval to create animtion for box
-                //          */
-                //         // box.matrix.fromArray(ev.data.matrixGL_RH);
-                //         box.visible = true;
-                //         // preMatrix = ev.data.matrixGL_RH;
-                //         var interval = setInterval(function() {
-                //             var delta = 0.01;
-                //             box.children[0].position.y += delta;
-                //             box.children[1].position.y -= delta;
-                //             box.children[2].position.y -= delta;
-
-                //             if (Math.abs(box.children[1].position.y - box.children[0].position.y) >= 20) {
-                //                 clearInterval(interval);
-                //                 // object.visible = false;
-                //                 // global_scene.remove(object);
-                //                 var count = 0;
-                //                 /**
-                //                  * interval for create animtion for mobile (it runs after the box disable)
-                //                  * animation of mobile is change to rotate (Math.PI/2,0,0)
-                //                  */
-                //                 animationInterval = setInterval(function() {
-                //                     var delta = 0.003;
-                //                     /**
-                //                      * rotate for mobile
-                //                      */
-                //                     if (global_arcontroller.orientation === 'portrait') {
-                //                         if (mobile.rotation.y < 0)
-                //                             mobile.rotation.y += delta * 3 / 2;
-                //                         if (mobile.rotation.z < 0)
-                //                             mobile.rotation.z += delta;
-                //                         if (mobile.rotation.x > Math.PI / 2)
-                //                             mobile.rotation.x -= delta * 2;
-                //                         if (mobile.rotation.y >= 0 && mobile.rotation.z >= 0 && mobile.rotation.x <= Math.PI / 2) {
-
-                //                             first = false;
-                //                         }
-                //                     }
-                //                     /**
-                //                      * rotate for desktop
-                //                      */
-                //                     else {
-                //                         if (mobile.rotation.y > 0)
-                //                             mobile.rotation.y -= delta * 3 / 2;
-                //                         if (mobile.rotation.z < 0)
-                //                             mobile.rotation.z += delta;
-                //                         if (mobile.rotation.x < Math.PI / 2)
-                //                             mobile.rotation.x += delta * 2;
-                //                         if (mobile.rotation.y <= 0 && mobile.rotation.z >= 0 && mobile.rotation.x >= Math.PI / 2) {
-
-                //                             first = false;
-                //                         }
-                //                     }
-                //                 }, 100)
-                //             }
-                //         }, 100)
-                //     }
-                // } else {
-                //     isShow = true;
-                //     planeBox.visible = false;
-                //     var marker = ev.data.marker;
-                //     var obj;
-
-                //     obj = this.threeNFTMarkers[ev.data.marker.id];
-
-                //     if (obj) {
-                //         {
-                //             obj.matrix.fromArray(ev.data.matrixGL_RH);
-                //             obj.visible = true;
-                //             preMatrix = ev.data.matrixGL_RH;
-                //         }
-                //     }
-                // }
             });
 
 

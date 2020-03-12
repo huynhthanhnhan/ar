@@ -154,6 +154,9 @@ function initAR(modelUri) {
                 var finger_dist; // check distance of fingers on mobile
                 var modelScale = 0.5 // default scale of model
                 var modelCenterZ;
+                var mouseHoldTimer; // interval for check mouse hold
+                var isMouseHold = false; // if isMouseHold true, run the PickHelper for raycast check
+                var timeHold = 500; // When enough this time, mouse hold will be true
 
                 /**
                  * This return the position of mouse on the render canvas
@@ -198,7 +201,10 @@ function initAR(modelUri) {
                     arScene.setUnboxFlag(true);
                     if (arScene.isInteract()) {
                         preMousePos = getMousePos(renderer.domElement, ev);
-                        isRotate = true
+                        isRotate = true;
+                        mouseHoldTimer = setTimeout(function() {
+                            isMouseHold = true;
+                        }, timeHold);
                     }
                     //TODO: name
                     // arg: 
@@ -212,11 +218,13 @@ function initAR(modelUri) {
                  */
                 renderer.domElement.addEventListener('mousemove', function(ev) {
                     if (arScene.isInteract()) {
+                        var deltaX;
+                        var deltaY;
                         if (isRotate) {
                             var newMousePos = getMousePos(renderer.domElement, ev);
                             if (preMousePos.x && preMousePos.y) {
-                                var deltaX = newMousePos.x - preMousePos.x;
-                                var deltaY = newMousePos.y - preMousePos.y;
+                                deltaX = newMousePos.x - preMousePos.x;
+                                deltaY = newMousePos.y - preMousePos.y;
                                 window['root'] = objectRoot;
                                 // // objectRoot.geometry.computeBoundingBox();
                                 // // objectRoot.geometry.boundingBox.getCenter(center);
@@ -236,6 +244,11 @@ function initAR(modelUri) {
 
                             preMousePos = newMousePos;
                         }
+                        var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                        if (mouseHoldTimer && distance >= 2) {
+                            isMouseHold = false;
+                            clearTimeout(mouseHoldTimer);
+                        }
                     }
                 }, false);
                 renderer.domElement.addEventListener('mouseup', function(ev) {
@@ -244,6 +257,10 @@ function initAR(modelUri) {
                      */
                     if (arScene.isInteract()) {
                         isRotate = false;
+                        if (mouseHoldTimer) {
+                            isMouseHold = false;
+                            clearTimeout(mouseHoldTimer);
+                        }
                     }
                     clearPickPosition();
                     arScene.setContext(hint_Content);
@@ -281,7 +298,10 @@ function initAR(modelUri) {
                             finger_dist = get_distance(ev);
                         } else {
                             preMousePos = getTouchPos(renderer.domElement, ev);
-                            isRotate = true
+                            isRotate = true;
+                            mouseHoldTimer = setTimeout(function() {
+                                isMouseHold = true;
+                            }, timeHold);
                         }
                     }
                 }, false);
@@ -302,11 +322,13 @@ function initAR(modelUri) {
                             objectRoot.scale.z = scale;
                             finger_dist = new_finger_dist;
                         } else {
+                            var deltaX;
+                            var deltaY;
                             if (isRotate) {
                                 var newMousePos = getTouchPos(renderer.domElement, ev);
                                 if (preMousePos.x && preMousePos.y) {
-                                    var deltaX = newMousePos.x - preMousePos.x;
-                                    var deltaY = newMousePos.y - preMousePos.y;
+                                    deltaX = newMousePos.x - preMousePos.x;
+                                    deltaY = newMousePos.y - preMousePos.y;
                                     var scale = objectRoot.scale.x;
                                     modelCenterZ = scale / 10;
                                     objectRoot.translateZ(modelCenterZ);
@@ -317,12 +339,21 @@ function initAR(modelUri) {
 
                                 preMousePos = newMousePos;
                             }
+                            var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                            if (mouseHoldTimer && distance >= 2) {
+                                isMouseHold = false;
+                                clearTimeout(mouseHoldTimer);
+                            }
                         }
                     }
                 }, false);
                 renderer.domElement.addEventListener('touchend', function(ev) {
                     if (arScene.isInteract()) {
                         isRotate = false;
+                        if (mouseHoldTimer) {
+                            isMouseHold = false;
+                            clearTimeout(mouseHoldTimer);
+                        }
                     }
                     arScene.setContext(hint_Content);
                 }, false);
@@ -383,7 +414,6 @@ function initAR(modelUri) {
                                     arScene.setContext('info_back');
                                     break;
                                 default:
-                                    arScene.setContext(hint_Content);
                                     break;
                             }
                             // if (this.pickedObject.name == 'Mesh_0') {
@@ -542,7 +572,7 @@ function initAR(modelUri) {
                                 markerRoot.add(object);
                             }, function(xhr) {
 
-                                console.log((xhr.loaded / (xhr.total + xhr.loaded) * 100 * 2) + '% loaded');
+                                // console.log((xhr.loaded / (xhr.total + xhr.loaded) * 100 * 2) + '% loaded');
 
                             }, function(error) {
                                 console.error(error);
@@ -627,7 +657,7 @@ function initAR(modelUri) {
 
                             }, function(xhr) {
 
-                                console.log((xhr.loaded / (xhr.total + xhr.loaded) * 100 * 2) + '% loaded');
+                                // console.log((xhr.loaded / (xhr.total + xhr.loaded) * 100 * 2) + '% loaded');
 
                             }, function(error) {
                                 console.error(error);
@@ -711,7 +741,8 @@ function initAR(modelUri) {
                     window['id'] = loopID;
                     arScene.renderOn(renderer);
                     arScene.process();
-                    pickHelper.pick(pickPosition);
+                    if (isMouseHold)
+                        pickHelper.pick(pickPosition);
                     if (mixers.length > 0) {
                         for (var i = 0; i < mixers.length; i++) {
                             mixers[i].update(clock.getDelta());
