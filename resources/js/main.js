@@ -528,7 +528,7 @@ function initAR(modelUri) {
                  * 
                  * @param {any} markerId - set Id for object root marker
                  */
-                arController.loadNFTMarker('/resources/dataNFT/Kyanon', function(markerId) {
+                arController.loadNFTMarker('/resources/dataNFT/wall_paper', function(markerId) {
                     var markerRoot = arController.createThreeNFTMarker(markerId);
                     markerRoot.name = 'rootObject';
                     arScene.scene.add(markerRoot);
