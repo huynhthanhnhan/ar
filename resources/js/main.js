@@ -146,6 +146,8 @@ function initAR(modelUri) {
 
                 }
 
+                loadDivContent(arController.orientation === 'portrait' ? 'portraint' : 'landscape');
+
                 var mixers = []; // array for frames of animation of model. This is used in the loop
                 var clock = new THREE.Clock(); // use in loop to update mixers
                 var objectRoot; // the global object for model, use to interact with model outside load function

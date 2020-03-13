@@ -1,6 +1,6 @@
 /* THREE.js ARToolKit integration */
 
-var setContent;
+var setContent, setIsDetect;
 (function() {
     var integrate = function() {
         /**
@@ -124,13 +124,15 @@ var setContent;
         var typeContext; // status type of canvas hint or info
         var isFirstSetTypeContext = true; // only set the transform for canvas on the first time
         var isPortraint = false; // check is portraint mode
+        var isDetect = true; // will be not detect if the information div is showing
+
         /**
          * Create content for the canvas
          * 
          * @param {String} type - type of context
          */
         var createContext = function(type, content) {
-            var renderCanvas = document.getElementById('renderCanvasContext');
+            var divContent = document.getElementById('divContent');
             // console.log('set')
             var canvas = document.getElementById("boxCanvas");
             var ctx = canvas.getContext("2d");
@@ -162,6 +164,8 @@ var setContent;
             }
             if (type == 'hint_mobile' || type == 'hint_mobile_portraint' || type == 'hint_desktop') {
                 typeContext = 'hint';
+                // if (divContent)
+                //     divContent.style.display = 'none';
                 if (isShow)
                     planeBox.visible = false;
                 ctx.lineWidth = 50;
@@ -188,35 +192,52 @@ var setContent;
                     ctx.rotate(-Math.PI / 2); // revert rotation for the next setContext
             } else {
                 typeContext = 'info';
-                ctx.fillStyle = "#0d41a3";
-                ctx.fillRect(-canvas.width, -canvas.height, canvas.width * 2, canvas.height * 2);
-                ctx.lineWidth = 10;
+                // ctx.fillStyle = "#0d41a3";
+                // ctx.fillRect(-canvas.width, -canvas.height, canvas.width * 2, canvas.height * 2);
+                // ctx.lineWidth = 10;
 
-                ctx.strokeRect(0, 0, canvas.width, canvas.height);
-                if (isPortraint)
-                    var textSize = boxHeight / 20;
-                else
-                    var textSize = boxWidth / 20;
-                ctx.font = textSize + 'px samsung';
-                ctx.fillStyle = "white";
-                ctx.textAlign = "center";
+                // ctx.strokeRect(0, 0, canvas.width, canvas.height);
+                // if (isPortraint)
+                //     var textSize = boxHeight / 20;
+                // else
+                //     var textSize = boxWidth / 20;
+                // ctx.font = textSize + 'px samsung';
+                // ctx.fillStyle = "white";
+                // ctx.textAlign = "center";
+                // switch (type) {
+                //     case 'info_front':
+                //         drawContent(list_Front_Content, boxWidth, textSize);
+                //         break;
+                //     case 'info_camera':
+                //         drawContent(list_Camera_Content, boxWidth, textSize);
+                //         break;
+                //     case 'info_back':
+                //         drawContent(list_Back_Content, boxWidth, textSize);
+                //         break;
+                // }
+                isDetect = false;
+                planeBox.visible = false;
                 switch (type) {
                     case 'info_front':
-                        drawContent(list_Front_Content, boxWidth, textSize);
-                        break;
-                    case 'info_camera':
-                        drawContent(list_Camera_Content, boxWidth, textSize);
+                        setDivContent('front');
                         break;
                     case 'info_back':
-                        drawContent(list_Back_Content, boxWidth, textSize);
+                        setDivContent('back');
+                        break;
+                    case 'info_camera':
+                        setDivContent('camera');
                         break;
                 }
-                planeBox.visible = true;
             }
 
         }
 
         setContent = createContext;
+        /**
+         * Function for set the isDetect flag from other js file
+         * @param {*} flag - true: detect, false: none
+         */
+        setIsDetect = function(flag) { isDetect = flag };
 
         /**
             Creates a Three.js scene for use with this ARController.
@@ -397,19 +418,20 @@ var setContent;
                  * This call the process function for detect marker in three.min.js
                  */
                 process: function() {
-
-                    if (isShow)
-                        for (var i in self.threeNFTMarkers) {
-                            self.threeNFTMarkers[i].visible = true;
-                        }
-                    else
-                        for (var i in self.threeNFTMarkers) {
-                            self.threeNFTMarkers[i].visible = false;
-                        }
-                        // document.getElementById('txt').textContent = video.paused;
-                    if (video.paused)
-                        video.paused = false;
-                    self.process(video);
+                    if (isDetect) {
+                        if (isShow)
+                            for (var i in self.threeNFTMarkers) {
+                                self.threeNFTMarkers[i].visible = true;
+                            }
+                        else
+                            for (var i in self.threeNFTMarkers) {
+                                self.threeNFTMarkers[i].visible = false;
+                            }
+                            // document.getElementById('txt').textContent = video.paused;
+                        if (video.paused)
+                            video.paused = false;
+                        self.process(video);
+                    }
                 },
 
                 /**
